@@ -71,10 +71,8 @@ class _LoginPageState extends State<LoginPage> {
               child: Text('Sign in with Google'),
               onPressed: () {
                 _handleSignIn()
-                    .then((FirebaseUser user) => Scaffold.of(context)
-                        .showSnackBar(SnackBar(content: Text('ログインに成功しました🚀'))))
-                    .catchError((e) => Scaffold.of(context).showSnackBar(
-                        SnackBar(content: Text('おっと、何かがおかしいようです'))));
+                    .then((FirebaseUser user) => print('ログインに成功しました🚀'))
+                    .catchError((e) => print('おっと、何かがおかしいようです'));
               },
             )
           ],
