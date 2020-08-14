@@ -60,24 +60,30 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.title),
-      ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            RaisedButton(
-              child: Text('Sign in with Google'),
-              onPressed: () {
-                _handleSignIn()
-                    .then((FirebaseUser user) => print('ログインに成功しました🚀'))
-                    .catchError((e) => print('おっと、何かがおかしいようです'));
-              },
-            )
-          ],
+        appBar: AppBar(
+          title: Text(widget.title),
         ),
-      ),
-    );
+        body: Builder(
+          builder: (BuildContext context) {
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  RaisedButton(
+                    child: Text('Sign in with Google'),
+                    onPressed: () {
+                      _handleSignIn()
+                          .then((FirebaseUser user) => Scaffold.of(context)
+                              .showSnackBar(
+                                  SnackBar(content: Text('ログインに成功しました🚀'))))
+                          .catchError((e) => Scaffold.of(context).showSnackBar(
+                              SnackBar(content: Text('おっと、何かがおかしいようです'))));
+                    },
+                  )
+                ],
+              ),
+            );
+          },
+        ));
   }
 }
