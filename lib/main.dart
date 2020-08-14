@@ -1,4 +1,6 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
 void main() {
   runApp(MyApp());
@@ -13,27 +15,46 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.blue,
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
-      home: MyHomePage(title: 'Flutter Demo Home Page'),
+      home: LoginPage(title: 'Flutter Demo Home Page'),
     );
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  MyHomePage({Key key, this.title}) : super(key: key);
+class LoginPage extends StatefulWidget {
+  LoginPage({Key key, this.title}) : super(key: key);
 
   final String title;
 
   @override
-  _MyHomePageState createState() => _MyHomePageState();
+  State<StatefulWidget> createState() => _LoginPageState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
+class _LoginPageState extends State<LoginPage> {
+  final GoogleSignIn _googleSignIn = GoogleSignIn();
+  final FirebaseAuth _auth = FirebaseAuth.instance;
 
-  void _incrementCounter() {
-    setState(() {
-      _counter++;
-    });
+  Future<FirebaseUser> _handleSignIn() async {
+    GoogleSignInAccount googleCurrentUser = _googleSignIn.currentUser;
+
+    try {
+      if (googleCurrentUser == null)
+        googleCurrentUser = await _googleSignIn.signInSilently();
+      if (googleCurrentUser == null)
+        googleCurrentUser = await _googleSignIn.signIn();
+      if (googleCurrentUser == null) return null;
+
+      GoogleSignInAuthentication googleAuth =
+          await googleCurrentUser.authentication;
+      final AuthCredential credential = GoogleAuthProvider.getCredential(
+          idToken: googleAuth.idToken, accessToken: googleAuth.accessToken);
+      final FirebaseUser user =
+          (await _auth.signInWithCredential(credential)).user;
+
+      return user;
+    } catch (e) {
+      print(e);
+      return null;
+    }
   }
 
   @override
@@ -46,21 +67,19 @@ class _MyHomePageState extends State<MyHomePage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            Text(
-              'You have pushed the button this many times:',
-            ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headline4,
-            ),
+            RaisedButton(
+              child: Text('Sign in with Google'),
+              onPressed: () {
+                _handleSignIn()
+                    .then((FirebaseUser user) => Scaffold.of(context)
+                        .showSnackBar(SnackBar(content: Text('ログインに成功しました🚀'))))
+                    .catchError((e) => Scaffold.of(context).showSnackBar(
+                        SnackBar(content: Text('おっと、何かがおかしいようです'))));
+              },
+            )
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
 }
