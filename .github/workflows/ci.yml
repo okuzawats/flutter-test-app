@@ -16,8 +16,22 @@ jobs:
       - uses: subosito/flutter-action@v1
         with:
           channel: 'stable'
-      - name: build and download apk
-        run: flutter build apk --release
+#      - name: build and download apk
+#        run: flutter build apk --release
+      - name: set up private files
+        run: |
+          echo $SIGNING_KEY | base64 -di > android/app/key.jks
+        env:
+          SIGNING_KEY: ${{ secrets.ANDROID_KEY_JKS }}
+
+      - name: build release apk
+        run: |
+          flutter build apk --release --build-name=0.0.$GITHUB_RUN_NUMBER --build-number=$GITHUB_RUN_NUMBER
+        env:
+          KEY_STORE_PASSWORD: ${{ secrets.KEY_STORE_PASSWORD }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+          ALIAS: ${{ secrets.ALIAS }}
+          KEY_PATH: ../file.keystore
       - name: upload artifact to Firebase App Distribution
         uses: wzieba/Firebase-Distribution-Github-Action@v1.1.1
         with:
