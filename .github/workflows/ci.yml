@@ -20,10 +20,9 @@ jobs:
 #        run: flutter build apk --release
       - name: set up private files
         run: |
-          echo $SIGNING_KEY | base64 -di > android/app/key.jks
+          echo $SIGNING_KEY | base64 -di > android/file.keystore
         env:
           SIGNING_KEY: ${{ secrets.ANDROID_KEY_JKS }}
-
       - name: build release apk
         run: |
           flutter build apk --release --build-name=0.0.$GITHUB_RUN_NUMBER --build-number=$GITHUB_RUN_NUMBER
