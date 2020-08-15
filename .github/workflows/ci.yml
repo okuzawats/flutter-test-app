@@ -33,7 +33,7 @@ jobs:
       #- run: flutter build apk
 
       - name: Build signed APK
-        run: bash ./gradlew assembleRelease
+        run: bash ./android/gradlew assembleRelease
 
       - name: Check build file
         run: ls app/build/outputs/apk/release
